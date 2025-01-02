@@ -11,19 +11,25 @@ import { ErrorType } from '../types/ErrorType';
 type Props = {
   onAddTodo: (value: string) => Promise<void>;
   setErrorTodos: Dispatch<SetStateAction<ErrorType>>;
+  isTempTodo: boolean;
+  todosLength: number;
 };
 
-export const TodoHeader: FC<Props> = ({ onAddTodo, setErrorTodos }) => {
+export const TodoHeader: FC<Props> = ({
+  onAddTodo,
+  setErrorTodos,
+  isTempTodo,
+}) => {
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     inputRef.current?.focus();
-  }, []);
+  }, [isTempTodo]);
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
+    setErrorTodos(ErrorType.Empty);
     if (inputValue.trim() === '') {
       setErrorTodos(ErrorType.EmptyTitle);
 
@@ -33,7 +39,6 @@ export const TodoHeader: FC<Props> = ({ onAddTodo, setErrorTodos }) => {
     try {
       await onAddTodo(inputValue.trim());
       setInputValue('');
-      setErrorTodos(ErrorType.Empty);
     } catch (err) {
       setErrorTodos(ErrorType.AddTodo);
     }

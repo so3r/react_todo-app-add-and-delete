@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction } from 'react';
 import { Todo } from '../types/Todo';
 import { Filters } from '../types/Filters';
-import cn from 'classnames';
+import { TodoFilter } from './TodoFilter';
 
 type Props = {
   currentFilter: Filters;
@@ -10,25 +10,15 @@ type Props = {
   handleClearCompleted: () => Promise<void>;
 };
 
-const filters = [
-  { name: 'All', href: '#/', filter: Filters.All, dataCy: 'FilterLinkAll' },
-  {
-    name: 'Active',
-    href: '#/active',
-    filter: Filters.Active,
-    dataCy: 'FilterLinkActive',
-  },
-  {
-    name: 'Completed',
-    href: '#/completed',
-    filter: Filters.Completed,
-    dataCy: 'FilterLinkCompleted',
-  },
-];
+const areAllTodosIncomplete = (todos: Todo[]) =>
+  todos.every((todo: Todo) => !todo.completed);
 
-export const TodoFooter: React.FC<Props> = props => {
-  const { todos, handleClearCompleted, currentFilter, setCurrentFilter } =
-    props;
+export const TodoFooter: React.FC<Props> = ({
+  todos,
+  handleClearCompleted,
+  currentFilter,
+  setCurrentFilter,
+}) => {
   const activeTodos = todos.filter(todo => !todo.completed);
 
   return (
@@ -37,27 +27,16 @@ export const TodoFooter: React.FC<Props> = props => {
         {activeTodos.length} items left
       </span>
 
-      <nav className="filter" data-cy="Filter">
-        {filters.map(({ name, href, filter, dataCy }) => (
-          <a
-            key={filter}
-            href={href}
-            className={cn('filter__link', {
-              selected: currentFilter === filter,
-            })}
-            data-cy={dataCy}
-            onClick={() => setCurrentFilter(filter)}
-          >
-            {name}
-          </a>
-        ))}
-      </nav>
+      <TodoFilter
+        currentFilter={currentFilter}
+        setCurrentFilter={setCurrentFilter}
+      />
 
       <button
         type="button"
         className="todoapp__clear-completed"
         data-cy="ClearCompletedButton"
-        disabled={todos.every(todo => !todo.completed)}
+        disabled={areAllTodosIncomplete(todos)}
         onClick={handleClearCompleted}
       >
         Clear completed
